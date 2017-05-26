@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package istio.mixer.adapter;
+
+// non-functional: for example purposes only...
+import "metric.proto";
+import "google/rpc/status.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+
+service Processor {
+
+    // Methods generated from template protos...
+
+    rpc ProcessMetrics(ProcessMetricsRequest) returns (ProcessMetricsResponse) {}
+    // TODO: generate other Process* rpc methods...
+
+}
+
+message ProcessMetricsRequest {
+    ContextInfo context_info = 1; // seems like we might want this...
+    repeated MetricInstance metric_instances = 2;
+}
+
+// what else belongs here?
+message ContextInfo {
+    string scope = 1;
+    string subject = 2;
+    string config_version = 3;
+    string trace_id = 4; // ?
+}
+
+message MetricInstance {
+    string name = 1;
+    metric.Template template = 2;
+    MetricValue value = 3;
+    map<string, DimensionValue> dimensions = 4;
+
+    // maybe give each instance a unique id for tracking ?
+    string operation_id = 5;
+}
+
+message MetricValue {
+    // note: here i cheated and removed types that cannot be values
+    // we would need something structural or otherwise to achieve this
+    oneof value {
+        string string_value = 1;
+        int64 int64_value = 2;
+        double double_value = 3;
+        bool bool_value = 4;
+        google.protobuf.Timestamp timestamp_value = 5;
+        google.protobuf.Duration duration_value = 6;
+    }
+}
+
+message DimensionValue {
+    oneof value {
+        string string_value = 1;
+        int64 int64_value = 2;
+        double double_value = 3;
+        bool bool_value = 4;
+        google.protobuf.Timestamp timestamp_value = 5;
+        string ip_address_value = 6;
+        string email_value = 7;
+        string uri_value = 8;
+        string dns_name_value = 9;
+        google.protobuf.Duration duration_value = 10;
+    }
+}
+
+message ProcessMetricResponse {
+    message ProcessMetricError {
+        string operation_id = 1; // identify instance in request
+        google.rpc.Status status = 2;
+    }
+
+    // partial success/failure reporting
+    repeated ProcessMetricError errors = 1;
+}
