@@ -11,10 +11,21 @@ import "google/protobuf/duration.proto";
 service Processor {
 
     // Methods generated from template protos...
+    rpc ConfigureMetrics(ConfigureMetricsRequest) returns (ConfigureMetricsResponse){}
 
     rpc ProcessMetrics(ProcessMetricsRequest) returns (ProcessMetricsResponse) {}
+
     // TODO: generate other Process* rpc methods...
 
+}
+
+message ConfigureMetricsRequest {
+    ContextInfo context_info = 1; // seems like we might want this...
+    repeated metric.Template templates = 2;
+}
+
+message ConfigureMetricsResponse {
+    google.rpc.Status status = 1;
 }
 
 message ProcessMetricsRequest {
@@ -68,12 +79,12 @@ message DimensionValue {
     }
 }
 
-message ProcessMetricResponse {
-    message ProcessMetricError {
+message ProcessMetricsResponse {
+    message ProcessMetricsError {
         string operation_id = 1; // identify instance in request
         google.rpc.Status status = 2;
     }
 
     // partial success/failure reporting
-    repeated ProcessMetricError errors = 1;
+    repeated ProcessMetricsError errors = 1;
 }
